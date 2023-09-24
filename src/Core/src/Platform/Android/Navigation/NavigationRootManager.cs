@@ -132,36 +132,43 @@ namespace Microsoft.Maui.Platform
 			if (context is null)
 				return;
 
-			if (view == null)
+			if (view is null)
 			{
-				if (_viewFragment != null && !FragmentManager.IsDestroyed(context))
+				if (_viewFragment is not null && !FragmentManager.IsDestroyed(context))
 				{
 					_pendingFragment =
 						FragmentManager
 							.RunOrWaitForResume(context, fm =>
 							{
+								if (_viewFragment is null)
+									return;
+
 								fm
-								.BeginTransaction()
-								.Remove(_viewFragment)
-								.SetReorderingAllowed(true)
-								.Commit();
+									.BeginTransaction()
+									.Remove(_viewFragment)
+									.SetReorderingAllowed(true)
+									.Commit();
+
+								_viewFragment = null;
 							});
 				}
 
-				_viewFragment = null;
+				if (FragmentManager.IsDestroyed(context))
+					_viewFragment = null;
 			}
 			else
 			{
-				_viewFragment =
-					new ElementBasedFragment(
-						view,
-						_mauiContext,
-						OnWindowContentPlatformViewCreated);
 
 				_pendingFragment =
 					FragmentManager
 						.RunOrWaitForResume(context, fm =>
 						{
+							_viewFragment =
+								new ElementBasedFragment(
+									view,
+									_mauiContext,
+									OnWindowContentPlatformViewCreated);
+
 							fm
 								.BeginTransactionEx()
 								.ReplaceEx(Resource.Id.navigationlayout_content, _viewFragment)

@@ -17,6 +17,7 @@ namespace Maui.Controls.Sample
 
 	class App : Application
 	{
+		Window _window;
 		protected override Window CreateWindow(IActivationState activationState)
 		{
 			// To test shell scenarios, change this to true
@@ -24,11 +25,19 @@ namespace Maui.Controls.Sample
 
 			if (!useShell)
 			{
-				return new Window(new NavigationPage(new MainPage()));
+				//return new Window(new NavigationPage(new MainPage()) { Title = "what" });
+				return _window ??= new Window(new FlyoutPage()
+				{
+					Flyout = new ContentPage()
+					{
+						Title = "rabbit"
+					},
+					Detail = new NavigationPage(new MainPage()) { Title = "what" }
+				});
 			}
 			else
 			{
-				return new Window(new SandboxShell());
+				return _window ??= new Window(new SandboxShell());
 			}
 		}
 	}
