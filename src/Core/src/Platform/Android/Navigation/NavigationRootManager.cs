@@ -15,7 +15,7 @@ namespace Microsoft.Maui.Platform
 	{
 		IMauiContext _mauiContext;
 		AView? _rootView;
-		Fragment? _viewFragment;
+		ScopedFragment? _viewFragment;
 		IToolbarElement? _toolbarElement;
 
 		// TODO MAUI: temporary event to alert when rootview is ready
@@ -115,22 +115,37 @@ namespace Microsoft.Maui.Platform
 
 		void ClearPlatformParts()
 		{
+			_pendingFragment?.Dispose();
+			_pendingFragment = null;
 			DrawerLayout = null;
 			_rootView = null;
 			_toolbarElement = null;
 		}
 
+		IDisposable? _pendingFragment;
 		void SetContentView(IView? view)
 		{
+			_pendingFragment?.Dispose();
+			_pendingFragment = null;
+
+			var context = _mauiContext.Context;
+			if (context is null)
+				return;
+
 			if (view == null)
 			{
-				if (_viewFragment != null && !FragmentManager.IsDestroyed(_mauiContext.Context))
+				if (_viewFragment != null && !FragmentManager.IsDestroyed(context))
 				{
-					FragmentManager
-						.BeginTransaction()
-						.Remove(_viewFragment)
-						.SetReorderingAllowed(true)
-						.Commit();
+					_pendingFragment =
+						FragmentManager
+							.RunOrWaitForResume(context, fm =>
+							{
+								fm
+								.BeginTransaction()
+								.Remove(_viewFragment)
+								.SetReorderingAllowed(true)
+								.Commit();
+							});
 				}
 
 				_viewFragment = null;
@@ -140,14 +155,19 @@ namespace Microsoft.Maui.Platform
 				_viewFragment =
 					new ElementBasedFragment(
 						view,
-						_mauiContext!,
+						_mauiContext,
 						OnWindowContentPlatformViewCreated);
 
-				FragmentManager
-					.BeginTransaction()
-					.Replace(Resource.Id.navigationlayout_content, _viewFragment)
-					.SetReorderingAllowed(true)
-					.Commit();
+				_pendingFragment =
+					FragmentManager
+						.RunOrWaitForResume(context, fm =>
+						{
+							fm
+								.BeginTransactionEx()
+								.ReplaceEx(Resource.Id.navigationlayout_content, _viewFragment)
+								.SetReorderingAllowed(true)
+								.Commit();
+						});
 			}
 		}
 
