@@ -19,21 +19,14 @@ namespace Microsoft.Maui.DeviceTests
 
 			var imageButton = new ImageButtonStub
 			{
-				Height = 50,
-				Width = 100,
-				StrokeThickness = 2,
-				StrokeColor = xplatStrokeColor
+				Height = 50, Width = 100, StrokeThickness = 2, StrokeColor = xplatStrokeColor
 			};
 
 			var expectedValue = xplatStrokeColor.ToPlatform();
 
 			var values = await GetValueAsync(imageButton, (handler) =>
 			{
-				return new
-				{
-					ViewValue = imageButton.StrokeColor,
-					PlatformViewValue = GetNativeStrokeColor(handler)
-				};
+				return new { ViewValue = imageButton.StrokeColor, PlatformViewValue = GetNativeStrokeColor(handler) };
 			});
 
 			Assert.Equal(xplatStrokeColor, values.ViewValue);
@@ -68,5 +61,10 @@ namespace Microsoft.Maui.DeviceTests
 
 		bool ImageSourceLoaded(ImageButtonHandler imageButtonHandler) =>
 			imageButtonHandler.PlatformView.ImageView.Image != null;
+
+		public partial class ImageButtonImageHandlerTests
+		{
+			protected override bool UsesAnimatedImages => false;
+		}
 	}
 }
