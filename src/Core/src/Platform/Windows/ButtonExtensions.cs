@@ -159,6 +159,7 @@ namespace Microsoft.Maui.Platform
 		{
 			if (platformButton.GetContent<WImage>() is WImage nativeImage)
 			{
+				nativeImage.Stretch = UI.Xaml.Media.Stretch.Uniform;
 				nativeImage.Source = nativeImageSource;
 
 				if (nativeImageSource is not null)
