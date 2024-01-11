@@ -17,7 +17,7 @@ namespace Microsoft.Maui.AppiumTests.Issues
 		{
 			this.IgnoreIfPlatforms(new[]
 			{
-				TestDevice.iOS, TestDevice.Mac, TestDevice.Windows
+				TestDevice.iOS, TestDevice.Mac
 			});
 
 			App.WaitForElement("WaitForStubControl");
