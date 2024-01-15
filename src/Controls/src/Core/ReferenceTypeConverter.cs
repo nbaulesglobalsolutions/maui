@@ -10,6 +10,7 @@ using Microsoft.Maui.Controls.Xaml.Internals;
 namespace Microsoft.Maui.Controls
 {
 	/// <include file="../../docs/Microsoft.Maui.Controls/ReferenceTypeConverter.xml" path="Type[@FullName='Microsoft.Maui.Controls.ReferenceTypeConverter']/Docs/*" />
+	[RequireService([typeof(IReferenceProvider), typeof(IProvideParentValues)])]
 	public sealed class ReferenceTypeConverter : TypeConverter, IExtendedTypeConverter
 	{
 
@@ -28,7 +29,7 @@ namespace Microsoft.Maui.Controls
 			if (referenceProvider != null)
 				return referenceProvider.FindByName(value) ?? throw new XamlParseException($"Can't resolve name '{value}' on Element", serviceProvider);
 
-			if (!(serviceProvider.GetService(typeof(IProvideValueTarget)) is IProvideParentValues valueProvider))
+			if (!(serviceProvider.GetService(typeof(IProvideParentValues)) is IProvideParentValues valueProvider))
 				throw new ArgumentException("serviceProvider does not provide an IProvideValueTarget");
 
 			foreach (var target in valueProvider.ParentObjects)
