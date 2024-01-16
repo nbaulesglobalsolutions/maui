@@ -46,7 +46,7 @@ namespace Microsoft.Maui
 			_services.AddSpecific(typeof(TService), static state => ((WeakReference)state).Target, new WeakReference(instance));
 		}
 
-		class WrappedServiceProvider : IServiceProvider
+		class WrappedServiceProvider : IServiceProvider, IKeyedServiceProvider
 		{
 			readonly ConcurrentDictionary<Type, (object, Func<object, object?>)> _scopeStatic = new();
 
@@ -71,6 +71,20 @@ namespace Microsoft.Maui
 			public void AddSpecific(Type type, Func<object, object?> getter, object state)
 			{
 				_scopeStatic[type] = (state, getter);
+			}
+
+			public object? GetKeyedService(Type serviceType, object? serviceKey)
+			{
+				if (Inner is IKeyedServiceProvider provider)
+					return provider.GetKeyedService(serviceType, serviceKey);
+
+				// we know this won't work, but we need to call it to throw the right exception
+				return Inner.GetRequiredKeyedService(serviceType, serviceKey);
+			}
+
+			public object GetRequiredKeyedService(Type serviceType, object? serviceKey)
+			{
+				return Inner.GetRequiredKeyedService(serviceType, serviceKey);
 			}
 		}
 	}

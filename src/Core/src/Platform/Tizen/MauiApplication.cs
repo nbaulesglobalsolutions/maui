@@ -40,13 +40,13 @@ namespace Microsoft.Maui
 			FontClient.Instance.AddCustomFontDirectory(fontResourcePath);
 
 			var mauiApp = CreateMauiApp();
-			var rootContext = new MauiContext(mauiApp.Services);
+			_applicationContext = new MauiContext(mauiApp.Services);
 
 			var platformWindow = CoreAppExtensions.GetDefaultWindow();
 			platformWindow.Initialize();
-			rootContext.AddWeakSpecific(platformWindow);
+			_applicationContext.AddWeakSpecific(platformWindow);
 
-			_applicationContext = rootContext.MakeApplicationScope(this);
+			_applicationContext.InitializeApplicationScope(this);
 
 			_services = _applicationContext.Services;
 

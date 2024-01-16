@@ -30,10 +30,10 @@ namespace Microsoft.Maui.DeviceTests
 			mauiContext ??= MauiContext;
 			return InvokeOnMainThreadAsync(async () =>
 			{
-				var applicationContext = mauiContext.MakeApplicationScope(UI.Xaml.Application.Current);
+				mauiContext.InitializeApplicationScope(UI.Xaml.Application.Current);
 
 				var appStub = new MauiAppNewWindowStub(window);
-				UI.Xaml.Application.Current.SetApplicationHandler(appStub, applicationContext);
+				UI.Xaml.Application.Current.SetApplicationHandler(appStub, mauiContext);
 				WWindow newWindow = null;
 				try
 				{

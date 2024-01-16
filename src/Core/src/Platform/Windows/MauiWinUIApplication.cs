@@ -33,15 +33,15 @@ namespace Microsoft.Maui
 
 			var rootContext = new MauiContext(mauiApp.Services);
 
-			var applicationContext = rootContext.MakeApplicationScope(this);
+			rootContext.InitializeApplicationScope(this);
 
-			_services = applicationContext.Services;
+			_services = rootContext.Services;
 
 			_services.InvokeLifecycleEvents<WindowsLifecycle.OnLaunching>(del => del(this, args));
 
 			_application = _services.GetRequiredService<IApplication>();
 
-			this.SetApplicationHandler(_application, applicationContext);
+			this.SetApplicationHandler(_application, rootContext);
 
 			this.CreatePlatformWindow(_application, args);
 
