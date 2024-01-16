@@ -58,6 +58,9 @@ namespace Microsoft.Maui.Controls
 		void OnRequestedThemeChanged(object sender, AppThemeChangedEventArgs e)
 			=> ApplyCore(true);
 
+		void OnRequestedThemeChanged(object sender, EventArgs e)
+			=> ApplyCore(true);
+
 		void ApplyCore(bool dispatch = false)
 		{
 			if (_weakTarget == null || !_weakTarget.TryGetTarget(out var target))
@@ -115,31 +118,16 @@ namespace Microsoft.Maui.Controls
 
 		public object Default { get; set; }
 
-		// Ideally this will get reworked to not use `Application.Current` at all
-		// https://github.com/dotnet/maui/issues/8713
-		// But I'm going with a simple nudge for now so that we can get our 
-		// device tests back to a working state and address issues
-		// of the more crashing variety
 		object GetValue()
 		{
-			Application app;
+			// try use the theme from the parent
+			var appTheme = AppTheme.Unspecified;
+			if (_weakTarget?.TryGetTarget(out var target) == true && target is VisualElement ve)
+				appTheme = ve.RequestedTheme;
 
-			if (_weakTarget?.TryGetTarget(out var target) == true &&
-				target is VisualElement ve &&
-				ve?.Window?.Parent is Application a)
-			{
-				app = a;
-			}
-			else
-			{
-				app = Application.Current;
-			}
-
-			AppTheme appTheme;
-			if (app == null)
-				appTheme = AppInfo.RequestedTheme;
-			else
-				appTheme = app.RequestedTheme;
+			// if no parent theme, try the app and then just ask the OS
+			if (appTheme == AppTheme.Unspecified)
+				appTheme = Application.Current?.RequestedTheme ?? AppInfo.RequestedTheme;
 
 			return appTheme switch
 			{
@@ -150,20 +138,29 @@ namespace Microsoft.Maui.Controls
 
 		void SetAttached(bool value)
 		{
-			var app = Application.Current;
-			if (app != null && _attached != value)
+			if (_attached == value)
+				return;
+
+			_attached = value;
+
+			if (_weakTarget?.TryGetTarget(out var target) == true && target is VisualElement ve)
 			{
+				// use the VisualElement as this is faster
+
 				if (value)
-				{
-					// Going from false -> true
-					app.RequestedThemeChanged += OnRequestedThemeChanged;
-				}
+					ve.RequestedThemeChanged += OnRequestedThemeChanged;
 				else
-				{
-					// Going from true -> false
+					ve.RequestedThemeChanged -= OnRequestedThemeChanged;
+			}
+			else
+			{
+				// fall back to the app
+
+				var app = Application.Current;
+				if (value)
+					app.RequestedThemeChanged += OnRequestedThemeChanged;
+				else
 					app.RequestedThemeChanged -= OnRequestedThemeChanged;
-				}
-				_attached = value;
 			}
 		}
 	}
