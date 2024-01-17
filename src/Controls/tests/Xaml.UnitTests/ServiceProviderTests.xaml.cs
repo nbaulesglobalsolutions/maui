@@ -74,7 +74,7 @@ public partial class ServiceProviderTests : ContentPage
             //IValueConverterProvider is builtin for free
             Assert.AreEqual(null, page.label0.Text);
             Assert.AreEqual("IProvideValueTarget,IValueConverterProvider", page.label1.Text);
-            Assert.AreEqual("IProvideValueTarget,IValueConverterProvider,IProvideParentValues,IReferenceProvider", page.label2.Text);
+            Assert.AreEqual("IProvideValueTarget,IValueConverterProvider,IReferenceProvider", page.label2.Text);
             Assert.AreEqual("IXmlLineInfoProvider,IValueConverterProvider", page.label3.Text);
         }
     }
